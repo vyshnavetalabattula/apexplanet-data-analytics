@@ -254,14 +254,6 @@ The database uses SQLite by default, with the connection configurable through th
 
 Parameterized SQL queries were used instead of directly inserting values into SQL strings.
 
-For example:
-
-```python
-run_query(
-    "SELECT COUNT(*) AS n FROM sales WHERE category = :cat",
-    {"cat": user_input}
-)
-
 ## Key Business Insights
 
 The SQL analysis was used to extract the following business insights:
