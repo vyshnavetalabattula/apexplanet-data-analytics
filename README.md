@@ -262,7 +262,19 @@ run_query(
     {"cat": user_input}
 )
 
+## Key Business Insights
 
+The SQL analysis was used to extract the following business insights:
+
+- Identified monthly sales and revenue trends and compared average order values across months.
+- Identified the top 10 revenue-generating shipping locations using city and postal code.
+- Calculated a location-based retention rate by identifying shipping locations with orders across multiple weeks.
+- Compared product categories based on order volume, units sold, total revenue, average order value, and revenue contribution.
+- Calculated daily revenue, a 7-day moving average, and cumulative revenue to analyze sales trends over time.
+- Identified orders above the overall average order value and compared their distribution across categories.
+- Identified high-volume, high-value shipping states using order-count and average-order-value thresholds.
+- Created a reusable SQL view for monthly category revenue analysis.
+- Used EXPLAIN QUERY PLAN to examine index usage and query performance.
 
 ## Author
 Data Analytics Intern — ApexPlanet Software Pvt. Ltd. Internship (45-Day Program)
