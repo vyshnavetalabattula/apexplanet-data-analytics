@@ -74,5 +74,193 @@ apexplanet-data-analytics/
 6. Order volume is concentrated in a handful of states (led by Maharashtra, Karnataka).
 7. Amazon-fulfilled orders dominate; B2B orders are under 1% of total volume.
 
+# Task 2: SQL & Data Extraction
+
+
+
+## Overview
+
+This task focuses on using SQL for data extraction, transformation, aggregation, and business-oriented analysis, along with integrating SQL databases with Python.
+
+The analysis was performed on the cleaned **Amazon Sale Report** dataset containing **128,942 order lines from March–June 2022**, carried forward from Task 1.
+
+## Objectives
+
+- Practice SQL fundamentals for data extraction and analysis
+- Perform filtering, sorting, aggregation, and grouping
+- Understand and implement different SQL JOIN operations
+- Use subqueries, CTEs, and window functions
+- Answer business questions using SQL
+- Calculate sales trends and category performance
+- Perform retention analysis
+- Calculate moving averages and cumulative revenue
+- Create and query SQL views
+- Understand query optimization using indexes and `EXPLAIN QUERY PLAN`
+- Integrate Python with SQL using SQLAlchemy and Pandas
+- Use parameterized queries for safer database operations
+
+---
+
+## 1. SQL Fundamentals
+
+The notebook covers the following SQL concepts:
+
+### SELECT, WHERE, ORDER BY & LIMIT
+
+Retrieved the 10 highest-value shipped orders from the **Western Dress** category.
+
+### SQL JOINs
+
+Demonstrated:
+
+- INNER JOIN
+- LEFT JOIN
+- RIGHT JOIN
+- FULL OUTER JOIN
+
+A `state_region` lookup table was used to map shipping states to regions.
+
+### GROUP BY, Aggregations & HAVING
+
+Performed category-level and state-level analysis using:
+
+- `COUNT()`
+- `SUM()`
+- `AVG()`
+- `MIN()`
+- `MAX()`
+- `HAVING`
+
+Examples include order counts, total units, average order value, and high-value shipping states.
+
+### Subqueries & CTEs
+
+Used subqueries and Common Table Expressions (CTEs) to identify:
+
+- Orders above the overall average order value
+- Categories containing above-average orders
+
+### Window Functions
+
+Implemented:
+
+- `ROW_NUMBER()`
+- `RANK()`
+- `LAG()`
+- `LEAD()`
+
+These were used to compare orders within product categories based on order value.
+
+---
+
+## 2. Advanced SQL & Business Analysis
+
+### Monthly Sales Trend
+
+Calculated monthly:
+
+- Order count
+- Total revenue
+- Average order value
+
+A bar chart was also created to visualize total revenue by month.
+
+### Top Revenue-Generating Locations
+
+Identified the top 10 shipping locations based on total revenue using:
+
+- `ship_city`
+- `ship_postal_code`
+- Order count
+- Total revenue
+
+### Retention Analysis
+
+Calculated the percentage of shipping locations that had orders across more than one distinct week.
+
+> **Important:** The dataset does not contain a `customer_id`. Therefore, `ship_city` + `ship_postal_code` was used as a delivery-location/customer proxy for this analysis.
+
+### Product Category Performance
+
+Compared product categories using:
+
+- Order count
+- Units sold
+- Total revenue
+- Average order value
+- Percentage contribution to total revenue
+
+### 7-Day Moving Average & Cumulative Revenue
+
+Used SQL window functions to calculate:
+
+- Daily revenue
+- 7-day moving average revenue
+- Cumulative revenue
+
+A visualization was created comparing daily revenue with the 7-day moving average.
+
+### SQL View
+
+Created a reusable SQL view:
+
+`vw_monthly_category_revenue`
+
+The view provides monthly revenue and order counts by product category.
+
+### Query Optimization
+
+Used:
+
+`EXPLAIN QUERY PLAN`
+
+to examine how SQLite executes queries and verify index usage.
+
+Indexes created for the sales table include:
+
+- `idx_sales_status`
+- `idx_sales_category`
+- `idx_sales_date`
+- `idx_sales_state`
+- `idx_sales_order_month`
+
+---
+
+## 3. Python + SQL Integration
+
+Python was integrated with the SQL database using:
+
+- **SQLAlchemy**
+- **Pandas**
+- `pandas.read_sql`
+
+A reusable `db_utils.py` module was used throughout the notebook.
+
+### Database Utility Functions
+
+The module provides:
+
+- `get_engine()` – creates and caches the SQLAlchemy database engine
+- `run_query()` – executes parameterized SELECT queries and returns Pandas DataFrames
+- `execute()` – executes non-SELECT SQL statements
+- `explain()` – runs `EXPLAIN QUERY PLAN`
+- `table_exists()` – verifies that required database tables exist
+
+The database uses SQLite by default, with the connection configurable through the `DATABASE_URL` environment variable.
+
+---
+
+## 4. Parameterized SQL Queries
+
+Parameterized SQL queries were used instead of directly inserting values into SQL strings.
+
+For example:
+
+```python
+run_query(
+    "SELECT COUNT(*) AS n FROM sales WHERE category = :cat",
+    {"cat": user_input}
+)
+
 ## Author
 Data Analytics Intern — ApexPlanet Software Pvt. Ltd. Internship (45-Day Program)
