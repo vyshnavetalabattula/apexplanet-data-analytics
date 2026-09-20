@@ -133,11 +133,6 @@ Navigate to the `scripts` directory:
 
 ```bash
 cd scripts
-python3 db_utils.py
-python3 -c "from db_utils import get_connection, execute_script; execute_script('queries.sql', get_connection())"
-
-```bash
-cd scripts
 ```
 
 ### Check the Database Connection
