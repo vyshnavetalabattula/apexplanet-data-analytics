@@ -74,199 +74,63 @@ apexplanet-data-analytics/
 6. Order volume is concentrated in a handful of states (led by Maharashtra, Karnataka).
 7. Amazon-fulfilled orders dominate; B2B orders are under 1% of total volume.
 
-# Task 2: SQL & Data Extraction
+# # Task 2 — SQL & Data Extraction
 
+## Objective
 
+Master SQL queries for data extraction, transformation, and aggregation; connect Python to a database.
 
-## Overview
+## What Was Built
 
-This task focuses on using SQL for data extraction, transformation, aggregation, and business-oriented analysis, along with integrating SQL databases with Python.
+- **`data/processed/amazon_sales.db`** — SQLite database loaded from the Task 1 cleaned dataset (table `orders`, 128,942 rows).
+- **`scripts/queries.sql`** — Complete SQL script covering fundamentals, advanced business queries, 3 views, and indexing/optimization.
+- **`scripts/db_utils.py`** — Reusable Python module for database connections using SQLAlchemy, with automatic fallback to `sqlite3` if SQLAlchemy is not installed.
+- **`notebooks/02_SQL_Data_Extraction.ipynb`** — Executed notebook running SQL queries from Python using `pandas.read_sql()`.
 
-The analysis was performed on the cleaned **Amazon Sale Report** dataset containing **128,942 order lines from March–June 2022**, carried forward from Task 1.
+## Dataset Limitation & Adaptations
 
-## Objectives
+The Amazon Sale Report is an **order-line export with no customer ID field**. Therefore, two of the internship's suggested business queries were adapted accordingly. The adaptations are clearly documented in both the `.sql` file and the notebook.
 
-- Practice SQL fundamentals for data extraction and analysis
-- Perform filtering, sorting, aggregation, and grouping
-- Understand and implement different SQL JOIN operations
-- Use subqueries, CTEs, and window functions
-- Answer business questions using SQL
-- Calculate sales trends and category performance
-- Perform retention analysis
-- Calculate moving averages and cumulative revenue
-- Create and query SQL views
-- Understand query optimization using indexes and `EXPLAIN QUERY PLAN`
-- Integrate Python with SQL using SQLAlchemy and Pandas
-- Use parameterized queries for safer database operations
+| Suggested Query | Adaptation Used | Reason |
+|---|---|---|
+| Top 10 customers by revenue | Top 10 shipping city/state combinations by revenue | No customer ID exists — location is the closest available grouping |
+| Customer retention rate | SKU repeat-order rate | No customer ID exists — SKU repetition is used as a demand-repetition proxy |
 
----
+All other suggested queries, including monthly sales trends, product category performance, moving averages, and cumulative sums, are answered directly.
 
-## 1. SQL Fundamentals
+## SQL Concepts Covered
 
-The notebook covers the following SQL concepts:
+- `SELECT` / `WHERE` / `ORDER BY` / `LIMIT`
+- `JOIN` — self-join, since there is only one table; demonstrates `INNER` / `LEFT JOIN` syntax
+- `GROUP BY` / `HAVING`
+- Aggregate functions: `COUNT`, `SUM`, `AVG`, `MIN`, `MAX`
+- Subqueries and CTEs using the `WITH` clause
+- Window functions:
+  - `ROW_NUMBER`
+  - `RANK`
+  - `LAG`
+  - `NTILE`
+- Views:
+  - `monthly_category_sales`
+  - `state_performance`
+  - `daily_sales_summary`
+- Query optimization using `EXPLAIN QUERY PLAN`
+- Five indexes created on frequently filtered columns
 
-### SELECT, WHERE, ORDER BY & LIMIT
+## Key Findings
 
-Retrieved the 10 highest-value shipped orders from the **Western Dress** category.
+1. **Monthly revenue declined** from ₹28.8M in April → ₹26.2M in May → ₹23.4M in June.
 
-### SQL JOINs
+2. **Maharashtra and Karnataka** were the top two revenue-generating states, with ₹13.3M and ₹10.5M respectively. Together, they contributed approximately **18% of total revenue**.
 
-Demonstrated:
+3. The **Set** and **kurta** categories recorded ₹3.47M and ₹1.87M respectively in cancelled order value, representing the biggest cancellation-driven revenue leaks.
 
-- INNER JOIN
-- LEFT JOIN
-- RIGHT JOIN
-- FULL OUTER JOIN
+4. Indexing `ship_state` changed the query plan from a full table **`SCAN`** to an index **`SEARCH`**, improving query execution for filtered aggregate queries.
 
-A `state_region` lookup table was used to map shipping states to regions.
+## How to Run
 
-### GROUP BY, Aggregations & HAVING
+Navigate to the `scripts` directory:
 
-Performed category-level and state-level analysis using:
-
-- `COUNT()`
-- `SUM()`
-- `AVG()`
-- `MIN()`
-- `MAX()`
-- `HAVING`
-
-Examples include order counts, total units, average order value, and high-value shipping states.
-
-### Subqueries & CTEs
-
-Used subqueries and Common Table Expressions (CTEs) to identify:
-
-- Orders above the overall average order value
-- Categories containing above-average orders
-
-### Window Functions
-
-Implemented:
-
-- `ROW_NUMBER()`
-- `RANK()`
-- `LAG()`
-- `LEAD()`
-
-These were used to compare orders within product categories based on order value.
-
----
-
-## 2. Advanced SQL & Business Analysis
-
-### Monthly Sales Trend
-
-Calculated monthly:
-
-- Order count
-- Total revenue
-- Average order value
-
-A bar chart was also created to visualize total revenue by month.
-
-### Top Revenue-Generating Locations
-
-Identified the top 10 shipping locations based on total revenue using:
-
-- `ship_city`
-- `ship_postal_code`
-- Order count
-- Total revenue
-
-### Retention Analysis
-
-Calculated the percentage of shipping locations that had orders across more than one distinct week.
-
-> **Important:** The dataset does not contain a `customer_id`. Therefore, `ship_city` + `ship_postal_code` was used as a delivery-location/customer proxy for this analysis.
-
-### Product Category Performance
-
-Compared product categories using:
-
-- Order count
-- Units sold
-- Total revenue
-- Average order value
-- Percentage contribution to total revenue
-
-### 7-Day Moving Average & Cumulative Revenue
-
-Used SQL window functions to calculate:
-
-- Daily revenue
-- 7-day moving average revenue
-- Cumulative revenue
-
-A visualization was created comparing daily revenue with the 7-day moving average.
-
-### SQL View
-
-Created a reusable SQL view:
-
-`vw_monthly_category_revenue`
-
-The view provides monthly revenue and order counts by product category.
-
-### Query Optimization
-
-Used:
-
-`EXPLAIN QUERY PLAN`
-
-to examine how SQLite executes queries and verify index usage.
-
-Indexes created for the sales table include:
-
-- `idx_sales_status`
-- `idx_sales_category`
-- `idx_sales_date`
-- `idx_sales_state`
-- `idx_sales_order_month`
-
----
-
-## 3. Python + SQL Integration
-
-Python was integrated with the SQL database using:
-
-- **SQLAlchemy**
-- **Pandas**
-- `pandas.read_sql`
-
-A reusable `db_utils.py` module was used throughout the notebook.
-
-### Database Utility Functions
-
-The module provides:
-
-- `get_engine()` – creates and caches the SQLAlchemy database engine
-- `run_query()` – executes parameterized SELECT queries and returns Pandas DataFrames
-- `execute()` – executes non-SELECT SQL statements
-- `explain()` – runs `EXPLAIN QUERY PLAN`
-- `table_exists()` – verifies that required database tables exist
-
-The database uses SQLite by default, with the connection configurable through the `DATABASE_URL` environment variable.
-
----
-
-## 4. Parameterized SQL Queries
-
-Parameterized SQL queries were used instead of directly inserting values into SQL strings.
-
-## Key Business Insights
-
-The SQL analysis was used to extract the following business insights:
-
-- Identified monthly sales and revenue trends and compared average order values across months.
-- Identified the top 10 revenue-generating shipping locations using city and postal code.
-- Calculated a location-based retention rate by identifying shipping locations with orders across multiple weeks.
-- Compared product categories based on order volume, units sold, total revenue, average order value, and revenue contribution.
-- Calculated daily revenue, a 7-day moving average, and cumulative revenue to analyze sales trends over time.
-- Identified orders above the overall average order value and compared their distribution across categories.
-- Identified high-volume, high-value shipping states using order-count and average-order-value thresholds.
-- Created a reusable SQL view for monthly category revenue analysis.
-- Used EXPLAIN QUERY PLAN to examine index usage and query performance.
-
-## Author
-Data Analytics Intern — ApexPlanet Software Pvt. Ltd. Internship (45-Day Program)
+```bash
+cd scripts
+## Data Analytics Intern — ApexPlanet Software Pvt. Ltd. Internship (45-Day Program)
