@@ -133,4 +133,32 @@ Navigate to the `scripts` directory:
 
 ```bash
 cd scripts
+python3 db_utils.py
+python3 -c "from db_utils import get_connection, execute_script; execute_script('queries.sql', get_connection())"
+
+```bash
+cd scripts
+```
+
+### Check the Database Connection
+
+```bash
+python3 db_utils.py
+```
+
+### Rebuild Views and Indexes
+
+```bash
+python3 -c "from db_utils import get_connection, execute_script; execute_script('queries.sql', get_connection())"
+```
+
+### Run the Notebook
+
+Open:
+
+```text
+notebooks/02_SQL_Data_Extraction.ipynb
+```
+
+The notebook contains the SQL queries executed against the SQLite database using Python and displays the resulting outputs.
 ## Data Analytics Intern — ApexPlanet Software Pvt. Ltd. Internship (45-Day Program)
